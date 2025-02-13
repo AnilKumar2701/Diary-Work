@@ -4,7 +4,160 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Diary Work</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* General Styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      background-color: #f1f4f8;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* School Header Styling */
+    .school-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .school-header h1 {
+      font-size: 48px;
+      color: #007BFF;
+      text-transform: uppercase;
+      margin: 0;
+      font-weight: bold;
+    }
+
+    /* Table Header Styling */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header .left, .header .right {
+      flex: 1;
+    }
+
+    .header .center {
+      flex: 2;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #333333;
+      text-transform: uppercase;
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+      text-transform: uppercase;
+    }
+
+    td input[type="text"] {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="date"], input[type="text"] {
+      padding: 8px;
+      width: calc(100% - 16px);
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .class-section-selection {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .class-section-selection .left, .class-section-selection .right {
+      flex: 1;
+    }
+
+    /* Hide dropdown arrow for print */
+    @media print {
+      input[type="date"], input[type="text"] {
+        appearance: none;
+        -webkit-appearance: none;
+        border: none;
+      }
+
+      .buttons {
+        display: none;
+      }
+    }
+
+    /* Signature Section */
+    .signature {
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    /* Button Styling */
+    .buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button.print-btn {
+      background-color: #28a745;
+      color: white;
+    }
+
+    button.share-btn {
+      background-color: #007bff;
+      color: white;
+    }
+
+    button.clear-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -26,7 +179,7 @@
       <div class="right">
         <label>Teacher Name: <input type="text" id="teacherName" placeholder="Enter name"></label>
         <br>
-        <label>Mobile Number: <input type="text" id="mobileNumber" placeholder="Enter mobile"></label>
+        <label>Mobile Number: <input type="text" id="mobileNumber" placeholder="Enter mobile" oninput="validateMobileNumber()"></label>
       </div>
     </div>
 
@@ -36,6 +189,9 @@
         <label for="classSelect">Class:</label>
         <select id="classSelect" onchange="updateSubjects()">
           <option value="">Select</option>
+          <option value="Nursery">Nursery</option>
+          <option value="LKG">LKG</option>
+          <option value="UKG">UKG</option>
           <option value="1">1st</option>
           <option value="2">2nd</option>
           <option value="3">3rd</option>
@@ -61,7 +217,7 @@
       </div>
     </div>
 
-    <!-- Tables -->
+    <!-- Table for Subjects and Messages -->
     <table>
       <thead>
         <tr>
@@ -69,9 +225,12 @@
           <th>Message</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- Dynamic subject rows will be inserted here -->
+      </tbody>
     </table>
 
+    <!-- New Table for Subject Teacher and Mobile Number -->
     <table>
       <thead>
         <tr>
@@ -79,7 +238,9 @@
           <th>Mobile Number</th>
         </tr>
       </thead>
-      <tbody id="teacherTableBody"></tbody>
+      <tbody id="teacherTableBody">
+        <!-- Dynamic rows for Subject Teacher and Mobile Number will be inserted here -->
+      </tbody>
     </table>
 
     <!-- Signature -->
@@ -96,6 +257,161 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // Automatically set the day based on the selected date
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateField = document.getElementById('date');
+      const dayField = document.getElementById('day');
+
+      // Set default date to today
+      const today = new Date();
+      dateField.value = today.toISOString().split('T')[0];
+      dayField.value = getDayName(today);
+
+      // Update day when date changes
+      dateField.addEventListener('change', () => {
+        const selectedDate = new Date(dateField.value);
+        dayField.value = getDayName(selectedDate);
+      });
+
+      // Load saved data from localStorage
+      loadSavedData();
+    });
+
+    function getDayName(date) {
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      return days[date.getDay()];
+    }
+
+    // Update subjects based on selected class
+    function updateSubjects() {
+      const classSelected = document.getElementById("classSelect").value;
+      const subjectsTable = document.querySelector("tbody");
+      subjectsTable.innerHTML = "";
+
+      let subjects = [];
+      if (classSelected === "1" || classSelected === "2") {
+        subjects = ["First Language (Telugu)", "Second Language (Hindi)", "English", "Maths"];
+      } else if (classSelected === "3" || classSelected === "4" || classSelected === "5") {
+        subjects = ["First Language (Telugu)", "Second Language (Hindi)", "English", "Maths", "Environmental Science (EVS)"];
+      } else if (classSelected === "6" || classSelected === "7") {
+        subjects = ["First Language (Telugu)", "Second Language (Hindi)", "English", "Maths", "General Science", "Social"];
+      } else if (classSelected === "8" || classSelected === "9" || classSelected === "10") {
+        subjects = ["First Language (Telugu)", "Second Language (Hindi)", "English", "Maths", "Physical Science", "Biological Science", "Social"];
+      }
+
+      subjects.forEach(subject => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${subject}</td><td><input type="text" placeholder="Enter message" oninput="saveMessage('${subject}', this.value)"></td>`;
+        subjectsTable.appendChild(row);
+
+      });
+
+      // Update the second table with subject teacher and mobile number
+      const teacherTableBody = document.getElementById("teacherTableBody");
+      teacherTableBody.innerHTML = "";
+      subjects.forEach(subject => {
+        const teacherRow = document.createElement('tr');
+teacherRow.innerHTML = `<td><input type="text" placeholder="Enter teacher name for ${subject}" oninput="saveTeacherName('${subject}', this.value)"></td>
+                        <td><input type="text" placeholder="Enter mobile number" oninput="saveTeacherMobile('${subject}', this.value)"></td>`;
+teacherTableBody.appendChild(teacherRow);
+
+      });
+    }
+
+    // Save subject message to localStorage
+    function saveMessage(subject, message) {
+      localStorage.setItem(subject, message);
+    }
+
+    // Save teacher name to localStorage
+    function saveTeacherName(subject, teacherName) {
+      localStorage.setItem(subject + '_teacher', teacherName);
+    }
+    function validateMobileNumber() {
+  const mobileInput = document.getElementById('mobileNumber');
+  mobileInput.value = mobileInput.value.replace(/\D/g, '').slice(0, 10);
+}
+
+    // Save teacher mobile number to localStorage
+    function saveTeacherMobile(subject, mobileNumber) {
+      localStorage.setItem(subject + '_mobile', mobileNumber);
+    }
+
+    // Save teacher name, mobile, and signature to localStorage
+    document.getElementById('teacherName').addEventListener('input', () => {
+      localStorage.setItem('teacherName', document.getElementById('teacherName').value);
+    });
+
+    document.getElementById('mobileNumber').addEventListener('input', () => {
+      localStorage.setItem('mobileNumber', document.getElementById('mobileNumber').value);
+    });
+
+    document.querySelector('.signature input').addEventListener('input', () => {
+      localStorage.setItem('signature', document.querySelector('.signature input').value);
+    });
+
+    // Load saved data
+    function loadSavedData() {
+      const savedDate = localStorage.getItem('date');
+      const savedDay = localStorage.getItem('day');
+      if (savedDate) {
+        document.getElementById('date').value = savedDate;
+        document.getElementById('day').value = savedDay || getDayName(new Date(savedDate));
+      }
+
+      document.getElementById('teacherName').value = localStorage.getItem('teacherName') || '';
+      document.getElementById('mobileNumber').value = localStorage.getItem('mobileNumber') || '';
+      document.querySelector('.signature input').value = localStorage.getItem('signature') || '';
+    }
+
+    // Print the page
+    function printPage() {
+      window.print();
+    }
+
+    // Share on WhatsApp
+    function shareOnWhatsApp() {
+      const mobileNumber = document.getElementById('mobileNumber').value;
+      const teacherName = document.getElementById('teacherName').value;
+      const day = document.getElementById('day').value;
+      const date = document.getElementById('date').value;
+
+      if (!mobileNumber) {
+        alert('Please enter a mobile number to share on WhatsApp.');
+        return;
+      }
+
+      let message = `Diary Work:\nDate: ${date}\nDay: ${day}\nTeacher: ${teacherName}\n\n`;
+document.querySelectorAll('tbody tr').forEach(row => {
+  const subject = row.cells[0].textContent;
+  const msg = row.cells[1].querySelector('input').value;
+  message += `${subject}: ${msg}\n`;
+});
+
+const url = `https://wa.me/${mobileNumber}?text=${encodeURIComponent(message)}`;
+window.open(url, '_blank');
+
+    }
+
+    // Clear all fields
+    function clearAll() {
+  localStorage.clear();
+  document.getElementById('date').value = '';
+  document.getElementById('day').value = '';
+  document.getElementById('teacherName').value = '';
+  document.getElementById('mobileNumber').value = '';
+  document.getElementById('classSelect').value = '';
+  document.getElementById('sectionSelect').value = '';
+  document.querySelectorAll("tbody tr input").forEach(input => input.value = '');
+  document.querySelector('.signature input').value = '';
+}
+
+    // Allow digits only in mobile number input
+    function validateMobileNumber() {
+      const mobileInput = document.getElementById('mobileNumber');
+      mobileInput.value = mobileInput.value.replace(/\D/g, '');
+    }
+  </script>
 </body>
 </html>
