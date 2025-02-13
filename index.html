@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diary Work</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- School Header -->
+    <div class="school-header">
+      <h1>SUNSHINE HIGH SCHOOL</h1>
+    </div>
+
+    <!-- Diary Header -->
+    <div class="header">
+      <div class="left">
+        <label>Date: <input type="date" id="date"></label>
+        <br>
+        <label>Day: <input type="text" id="day" placeholder="Auto-filled" readonly></label>
+      </div>
+      <div class="center">
+        <h1>Diary Work</h1>
+      </div>
+      <div class="right">
+        <label>Teacher Name: <input type="text" id="teacherName" placeholder="Enter name"></label>
+        <br>
+        <label>Mobile Number: <input type="text" id="mobileNumber" placeholder="Enter mobile"></label>
+      </div>
+    </div>
+
+    <!-- Class and Section Selection -->
+    <div class="class-section-selection">
+      <div class="left">
+        <label for="classSelect">Class:</label>
+        <select id="classSelect" onchange="updateSubjects()">
+          <option value="">Select</option>
+          <option value="1">1st</option>
+          <option value="2">2nd</option>
+          <option value="3">3rd</option>
+          <option value="4">4th</option>
+          <option value="5">5th</option>
+          <option value="6">6th</option>
+          <option value="7">7th</option>
+          <option value="8">8th</option>
+          <option value="9">9th</option>
+          <option value="10">10th</option>
+        </select>
+      </div>
+      <div class="right">
+        <label for="sectionSelect">Section:</label>
+        <select id="sectionSelect">
+          <option value="">Select</option>
+          <option value="Rose">Rose</option>
+          <option value="Lilly">Lilly</option>
+          <option value="Jasmine">Jasmine</option>
+          <option value="Girls">Girls</option>
+          <option value="Boys">Boys</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <table>
+      <thead>
+        <tr>
+          <th>Subjects</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Subject Teacher</th>
+          <th>Mobile Number</th>
+        </tr>
+      </thead>
+      <tbody id="teacherTableBody"></tbody>
+    </table>
+
+    <!-- Signature -->
+    <div class="signature">
+      <label>Signature:</label>
+      <input type="text" placeholder="Enter signature">
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="print-btn" onclick="printPage()">Print</button>
+      <button class="share-btn" onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+      <button class="clear-btn" onclick="clearAll()">Clear All</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
